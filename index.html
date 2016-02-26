@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script src="turf.min.js" charset="utf-8"></script>
+        <script src="wellknown.js" charset="utf-8"></script>
+        <style>
+            .container {
+              margin-right: auto;
+              margin-left: auto;
+              padding-left: 15px;
+              padding-right: 15px;
+            }
+            .row {
+              margin-left: -15px;
+              margin-right: -15px;
+            }
+            .col-sm {
+              position: relative;
+              min-height: 1px;
+              padding-left: 15px;
+              padding-right: 15px;
+            }
+            .form-control {
+                display: block;
+                width: 90%;
+                /*height: 38px;*/
+                padding: 6px 12px;
+                font-size: 13px;
+                line-height: 1.42857143;
+                color: #555555;
+                background-color: #f5f5f5;
+                background-image: none;
+                border: 1px solid #f5f5f5;
+                border-radius: 3px;
+                -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+                transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Conversions</p>
+            <form id="frm1">
+
+                <textarea class="form-control" id="nw" name="nw" rows="12">NW: 38.49715, -115.69250
+NE: 38.49715, -115.69193
+SE: 38.49670, -115.69193
+SW: 38.49670, -115.69250</textarea>
+            </form> 
+        <br>
+        <button onclick="corners_to_geojson()">Corners to GeoJSON</button>
+        <button onclick="geojson_to_wkt()">GeoJSON to WKT</button>
+        <br><br>
+        <textarea class="form-control" id="output" rows="12"></textarea>
+        Area: <p id="area"></p>
+
+        <script>
+        function corners_to_geojson() {
+            var x = document.getElementById("frm1");
+            var text = x.elements[0].value;
+
+            var strip_text = function(input_str) {
+                return input_str.replace(/[^\n\d.,-]|/g, '');
+            }
+            var rows = strip_text(text).split("\n").filter(Boolean);
+
+            var points = [];
+            for (var i = 0; i < rows.length;i++) {
+                var latlon = rows[i].split(",");
+                var lat = parseFloat(latlon[0]);
+                var lon = parseFloat(latlon[1]);
+                points.push([lon, lat]);
+            }
+            points.push(points[0]);
+
+            var polygon = turf.polygon([points]);
+            document.getElementById("output").innerHTML = JSON.stringify(polygon);
+
+            document.getElementById("area").innerHTML = JSON.stringify(turf.area(polygon));
+        }
+
+        function geojson_to_wkt() {
+            var geojson = JSON.parse(document.getElementById("frm1").elements[0].value);
+            document.getElementById("output").innerHTML = wellknown.stringify(geojson);
+        }
+        </script>
+    </body>
+</html>
